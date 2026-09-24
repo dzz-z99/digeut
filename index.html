@@ -1,1 +1,893 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>ㄷ</title>
+
+<meta name="description" content="">
+<meta name="author" content="">
+<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body {
+  margin: 18px;
+  font: 13px/14.5px Arial, sans-serif;
+  color: dimgrey;
+  overflow: hidden;
+  text-rendering: geometricPrecision;
+}
+
+/* Ballpoint cursor trail */
+
+#ink-trail {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: -1;
+  transform: none;
+
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container p {
+  position: absolute;
+  bottom: 6px;
+  left: 18px;
+  z-index: 10;
+}
+
+.container img {
+  position: relative;
+  z-index: 1;
+  max-height: 72vh;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+img {
+  cursor: pointer;
+  user-drag: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.horizon {
+  max-width: 840px;
+}
+
+.squarish {
+  max-width: 520px;
+}
+
+/* Top-left flipping card */
+
+.flip-card {
+  width: 270px;
+  max-width: calc(100vw - 36px);
+  perspective: 1000px;
+  position: relative;
+  z-index: 77;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.flip-card-inner {
+  display: grid;
+  transition: transform 0.65s ease;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+  display: block;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+#visible:hover {
+  text-decoration: none;
+}
+
+@media screen and (max-width: 960px) {
+
+  .container p {
+    max-width: calc(100vw - 36px);
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-height: 40vh;
+    overflow-y: auto;
+    bottom: 36px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Transparent surface for the cursor trail -->
+
+<canvas id="ink-trail" aria-hidden="true"></canvas>
+
+
+<!-- Top-left flipping image -->
+
+<div
+  class="flip-card"
+  id="top-card"
+  role="button"
+  tabindex="0"
+  aria-label="Flip card"
+  aria-pressed="false"
+>
+  <div class="flip-card-inner">
+
+    <!-- Front image -->
+    <img
+      class="flip-card-front"
+      src="https://upload.wikimedia.org/wikipedia/commons/0/03/%E3%84%B7_%28digeut%29_stroke_order.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+      alt="Front of card"
+    >
+
+    <!-- Back image -->
+    <img
+      class="flip-card-back"
+      src="http://economybooks.info/daste/digeut.png"
+      alt="Back of card"
+    >
+
+  </div>
+</div>
+
+<br><br>
+
+<a href="https://www.are.na/share/aDiexnH" target="_blank">
+  <img
+    src="http://economybooks.info/daste/15.gif"
+    style="
+      max-width: 70px;
+      position: relative;
+      z-index: 77;
+    "
+  >
+</a>
+
+<a href="https://www.youtube.com/watch?v=Bt3D3Ca9nww" target="_blank">
+  <img
+    src="http://economybooks.info/daste/10.gif"
+    style="
+      max-width: 70px;
+      position: relative;
+      z-index: 77;
+    "
+  >
+</a>
+
+
+<!-- Slideshow -->
+
+
+
+
+
+  
+<div class="container" onclick="plusSlides(1, 0)">
+
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/cover1.jpeg"
+    >
+
+    <p>
+Cover for a Monograph
+    </p>
+  </div>
+
+    <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/poster1.jpeg"
+    >
+
+    <p>
+Poster for a Show
+    </p>
+  </div>
+
+   <!--
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/business_cards1_1.jpeg"
+    >
+
+    <p>
+Business card
+    </p>
+  </div>
+
+
+    <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/business_cards1_2.jpeg"
+    >
+
+    <p>
+Business card
+    </p>
+  </div>
+
+
+  
+ 
+
+
+  
+
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/sticker1.png"
+    >
+
+    <p>
+      Sticker for a Book Cover
+    </p>
+  </div>
+
+  <div class="thing">
+<img class="horizon" src="http://economybooks.info/daste/bomit.png"> 
+<p>
+Typeset for a Reading
+</p>
+</div>
+
+
+
+
+
+  <div class="thing">
+<img class="horizon" src="https://www.slavsandtatars.com/site/assets/files/1570/s_t_ogorek-trocki_white_2016_2.1024x0.jpg"> 
+<p>
+Poster for a Show
+</p>
+</div>
+
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/Scan 26.jpeg"
+    >
+
+    <p>
+Back Cover for a Monograph
+    </p>
+  </div>
+
+<!--
+
+<div class="thing">
+<img class="horizon" src="http://economybooks.info/daste/Scan 36.jpeg"> 
+<p>
+Layout for a Monograph
+</p>
+</div>
+
+
+  
+  <div class="thing">
+<img class="horizon" src="/Users/dariodezfulirello/Dropbox/_PRACTICE_docs/_graphic_design/chihuahaua_poster/sketches/toghost_sketch6.jpg"> 
+<p>
+Sketch for a Poster
+</p>
+</div>
+
+
+  <div class="thing">
+<img class="horizon" src="/Users/dariodezfulirello/Dropbox/_PRACTICE_docs/_graphic_design/chihuahaua_poster/sketches/toghost_sketch1.jpg"> 
+<p>
+Sketch for a Poster
+</p>
+</div>
+
+
+<!--
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="/Users/dariodezfulirello/Dropbox/_web_sascha/keyhole/keyhole.jpg"
+    >
+
+    <p>
+      Display Distribute: Catalogue No.5, 展銷場：目錄 第五期; book design, 2025<br>
+      published by Display Distribute (HK)<br>
+      470 pages, offset b/w, 4/4, perfect bound, hot melt. 12.5 × 18.5cm
+    </p>
+  </div>
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="/Users/dariodezfulirello/Dropbox/_PRACTICE_docs/PORTFOLIO/gd_portfolio_jiyoung/graphics/business_cards1_1.jpeg"
+    >
+
+    <p>
+      Display Distribute: Catalogue No.5, 展銷場：目錄 第五期; book design, 2025<br>
+      published by Display Distribute (HK)<br>
+      470 pages, offset b/w, 4/4, perfect bound, hot melt. 12.5 × 18.5cm
+    </p>
+  </div>
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="/Users/dariodezfulirello/Dropbox/_scans/Scan 26.jpeg"
+    >
+
+    <p>
+      <a
+        href="https://www.instagram.com/p/CoKfnAEK5qm/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA=="
+        target="_blank"
+      >
+        machines
+      </a>, 2022<br>
+
+      book design for exhibition and installations; 'PM-10',
+      'chopped and screwed', and 'CAM to CAM' from
+      'Le Collectif In Extremis.'<br>
+
+      264 pages, 13.75 × 29.7cm, published by
+      'Le Collectif In Extremis', made in collaboration
+      with Johanna Himmelsbach
+    </p>
+  </div>
+
+
+
+
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="/Users/dariodezfulirello/Dropbox/_scans/neshad/Scan 36.jpeg"
+    >
+
+    <p>
+      <a href="https://monumentofapron.com/" target="_blank">
+        Monument of Apron
+      </a>,
+      web design for the collective 'Display Distribute',
+      web development by Marie MadonnaCédric and Rossignol-Brunet
+    </p>
+  </div>
+
+</div>
+
+
+-->
+
+<script>
+
+/* Slideshow */
+
+var slideId = ["thing"];
+var slideIndex = [0];
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  var x = document.getElementsByClassName(slideId[0]);
+
+  slideIndex[0] =
+    Math.floor(Math.random() * x.length) + 1;
+
+  showSlides(slideIndex[0], 0);
+
+});
+
+function plusSlides(n, no) {
+  showSlides(slideIndex[no] += n, no);
+}
+
+function showSlides(n, no) {
+
+  var i;
+  var x = document.getElementsByClassName(slideId[no]);
+
+  if (n > x.length) {
+    slideIndex[no] = 1;
+  }
+
+  if (n < 1) {
+    slideIndex[no] = x.length;
+  }
+
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+
+  x[slideIndex[no] - 1].style.display = "block";
+}
+
+
+/* Flipping card */
+
+var topCard = document.getElementById("top-card");
+
+function flipTopCard() {
+  topCard.classList.toggle("flipped");
+
+  topCard.setAttribute(
+    "aria-pressed",
+    topCard.classList.contains("flipped")
+  );
+}
+
+topCard.addEventListener("click", function (event) {
+  event.stopPropagation();
+  flipTopCard();
+});
+
+topCard.addEventListener("keydown", function (event) {
+
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    flipTopCard();
+  }
+
+});
+
+
+/* Natural ballpoint cursor trail */
+
+(function () {
+
+  var canvas = document.getElementById("ink-trail");
+  var context = canvas.getContext("2d");
+
+  var points = [];
+  var animationRunning = false;
+  var pixelRatio = 1;
+
+  /*
+  Adjust these values if desired.
+  */
+
+  var trailLength = 7575;    // Length of the visible line in pixels
+  var trailLifetime = 19000; // How quickly it disappears, in milliseconds
+
+  var inkRed = 54;
+  var inkGreen = 49;
+  var inkBlue = 192;
+
+
+  function resizeCanvas() {
+
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(window.innerWidth * pixelRatio);
+    canvas.height = Math.round(window.innerHeight * pixelRatio);
+
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+
+    context.setTransform(
+      pixelRatio,
+      0,
+      0,
+      pixelRatio,
+      0,
+      0
+    );
+
+  }
+
+
+  function distanceBetween(pointA, pointB) {
+
+    var differenceX = pointB.x - pointA.x;
+    var differenceY = pointB.y - pointA.y;
+
+    return Math.sqrt(
+      differenceX * differenceX +
+      differenceY * differenceY
+    );
+
+  }
+
+
+  function trimTrailLength() {
+
+    var totalLength = 0;
+
+    for (var i = points.length - 1; i > 0; i--) {
+
+      var newerPoint = points[i];
+      var olderPoint = points[i - 1];
+
+      var sectionLength =
+        distanceBetween(newerPoint, olderPoint);
+
+      if (totalLength + sectionLength > trailLength) {
+
+        var remainingLength =
+          trailLength - totalLength;
+
+        var ratio =
+          remainingLength / sectionLength;
+
+        var cutPoint = {
+          x: newerPoint.x +
+             (olderPoint.x - newerPoint.x) * ratio,
+
+          y: newerPoint.y +
+             (olderPoint.y - newerPoint.y) * ratio,
+
+          time: newerPoint.time +
+                (olderPoint.time - newerPoint.time) * ratio,
+
+          offsetX: 0,
+          offsetY: 0,
+
+          width:
+            newerPoint.width +
+            (olderPoint.width - newerPoint.width) * ratio,
+
+          dryness: olderPoint.dryness,
+          fleck: false,
+          fleckX: 0,
+          fleckY: 0
+        };
+
+        points.splice(0, i, cutPoint);
+        break;
+      }
+
+      totalLength += sectionLength;
+    }
+
+  }
+
+
+  function addPoint(x, y, time) {
+
+    var previousPoint =
+      points.length > 0
+        ? points[points.length - 1]
+        : null;
+
+    if (previousPoint) {
+
+      var movement =
+        Math.sqrt(
+          Math.pow(x - previousPoint.x, 2) +
+          Math.pow(y - previousPoint.y, 2)
+        );
+
+      if (movement < 1.2) {
+        return;
+      }
+
+    }
+
+    var speed = 0.2;
+
+    if (previousPoint) {
+
+      var timeDifference =
+        Math.max(1, time - previousPoint.time);
+
+      speed =
+        distanceBetween(previousPoint, { x: x, y: y }) /
+        timeDifference;
+
+    }
+
+    /*
+    Moving slowly produces a slightly thicker line,
+    similar to a ballpoint pen.
+    */
+
+var lineWidth =
+  Math.max(
+    1.5,
+    Math.min(3.2, 2.8 - speed * 1.1)
+  );
+
+    points.push({
+      x: x,
+      y: y,
+      time: time,
+
+      offsetX: (Math.random() - 0.5) * 0.8,
+      offsetY: (Math.random() - 0.5) * 0.8,
+
+      width: lineWidth,
+
+      dryness: Math.random(),
+
+      fleck: Math.random() > 0.82,
+      fleckX: (Math.random() - 0.5) * 4,
+      fleckY: (Math.random() - 0.5) * 4
+    });
+
+    trimTrailLength();
+
+    if (!animationRunning) {
+      animationRunning = true;
+      requestAnimationFrame(drawTrail);
+    }
+
+  }
+
+
+  function drawTrail(currentTime) {
+
+    context.clearRect(
+      0,
+      0,
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    /*
+    Remove points that have completely faded.
+    */
+
+    while (
+      points.length > 0 &&
+      currentTime - points[0].time > trailLifetime
+    ) {
+      points.shift();
+    }
+
+
+    if (points.length > 1) {
+
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      for (var i = 1; i < points.length; i++) {
+
+        var previousPoint = points[i - 1];
+        var currentPoint = points[i];
+
+        var age =
+          (currentTime - currentPoint.time) /
+          trailLifetime;
+
+        var fade =
+          Math.max(0, 1 - age);
+
+        /*
+        Some sections have less ink, creating
+        tiny dry gaps and changes in density.
+        */
+
+        var dryness =
+          currentPoint.dryness < 0.13
+            ? 0.22
+            : 1;
+
+        var startX =
+          previousPoint.x + previousPoint.offsetX;
+
+        var startY =
+          previousPoint.y + previousPoint.offsetY;
+
+        var endX =
+          currentPoint.x + currentPoint.offsetX;
+
+        var endY =
+          currentPoint.y + currentPoint.offsetY;
+
+        var middleX =
+          (startX + endX) / 2 +
+          (currentPoint.dryness - 0.5) * 0.8;
+
+        var middleY =
+          (startY + endY) / 2 +
+          (0.5 - currentPoint.dryness) * 0.8;
+
+
+        /* Main ink line */
+
+        context.beginPath();
+        context.moveTo(startX, startY);
+
+        context.quadraticCurveTo(
+          middleX,
+          middleY,
+          endX,
+          endY
+        );
+
+        context.lineWidth =
+          currentPoint.width;
+
+        context.strokeStyle =
+          "rgba(" +
+          inkRed + "," +
+          inkGreen + "," +
+          inkBlue + "," +
+          (0.40 * fade * dryness) +
+          ")";
+
+        context.stroke();
+
+
+        /*
+        A second thin, slightly displaced line
+        gives the ink an uneven ballpoint texture.
+        */
+
+        context.beginPath();
+
+        context.moveTo(
+          startX + 0.35,
+          startY - 0.2
+        );
+
+        context.quadraticCurveTo(
+          middleX + 0.2,
+          middleY - 0.25,
+          endX + 0.25,
+          endY - 0.15
+        );
+
+        context.lineWidth =
+          Math.max(0.35, currentPoint.width * 0.38);
+
+        context.strokeStyle =
+          "rgba(85,75,216," +
+          (0.22 * fade) +
+          ")";
+
+        context.stroke();
+
+
+        /* Occasional tiny ink fleck */
+
+        if (currentPoint.fleck) {
+
+          context.beginPath();
+
+          context.arc(
+            endX + currentPoint.fleckX,
+            endY + currentPoint.fleckY,
+            0.3 + currentPoint.dryness * 0.45,
+            0,
+            Math.PI * 2
+          );
+
+          context.fillStyle =
+            "rgba(" +
+            inkRed + "," +
+            inkGreen + "," +
+            inkBlue + "," +
+            (0.22 * fade) +
+            ")";
+
+          context.fill();
+
+        }
+
+      }
+
+    }
+
+
+    if (points.length > 0) {
+
+      requestAnimationFrame(drawTrail);
+
+    } else {
+
+      animationRunning = false;
+
+    }
+
+  }
+
+
+  window.addEventListener("resize", resizeCanvas);
+
+
+  window.addEventListener(
+    "pointermove",
+    function (event) {
+
+      /*
+      Touchscreens do not have a cursor, so the
+      effect is limited to a mouse or drawing pen.
+      */
+
+      if (event.pointerType === "touch") {
+        return;
+      }
+
+      var movements =
+        event.getCoalescedEvents
+          ? event.getCoalescedEvents()
+          : [event];
+
+      for (var i = 0; i < movements.length; i++) {
+
+        addPoint(
+          movements[i].clientX,
+          movements[i].clientY,
+          movements[i].timeStamp
+        );
+
+      }
+
+    },
+    { passive: true }
+  );
+
+
+  resizeCanvas();
+
+})();
+
+</script>
+
+</body>
+</html>
 
