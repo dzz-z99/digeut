@@ -2,7 +2,6 @@
 <html>
 <head>
 <meta charset="UTF-8">
-
 <title>ㄷ</title>
 
 <meta name="description" content="">
@@ -19,8 +18,6 @@ body {
   text-rendering: geometricPrecision;
 }
 
-/* Transparent ballpoint layers */
-
 #automatic-ink,
 #ink-trail {
   position: fixed;
@@ -31,13 +28,8 @@ body {
   mix-blend-mode: multiply;
 }
 
-#automatic-ink {
-  z-index: 99998;
-}
-
-#ink-trail {
-  z-index: 99999;
-}
+#automatic-ink { z-index: 99998; }
+#ink-trail { z-index: 99999; }
 
 .container {
   position: fixed;
@@ -82,19 +74,10 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
-}
+a:hover { text-decoration: underline; }
 
-.horizon {
-  max-width: 840px;
-}
-
-.squarish {
-  max-width: 520px;
-}
-
-/* Top-left flipping card */
+.horizon { max-width: 840px; }
+.squarish { max-width: 520px; }
 
 .flip-card {
   width: 270px;
@@ -127,13 +110,9 @@ a:hover {
   -webkit-backface-visibility: hidden;
 }
 
-.flip-card-back {
-  transform: rotateY(180deg);
-}
+.flip-card-back { transform: rotateY(180deg); }
 
-#visible:hover {
-  text-decoration: none;
-}
+#visible:hover { text-decoration: none; }
 
 @media screen and (max-width: 960px) {
   .container p {
@@ -154,8 +133,6 @@ a:hover {
 <canvas id="automatic-ink" aria-hidden="true"></canvas>
 <canvas id="ink-trail" aria-hidden="true"></canvas>
 
-<!-- Top-left flipping image -->
-
 <div
   class="flip-card"
   id="top-card"
@@ -170,7 +147,6 @@ a:hover {
       src="https://upload.wikimedia.org/wikipedia/commons/0/03/%E3%84%B7_%28digeut%29_stroke_order.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
       alt="Front of card"
     >
-
     <img
       class="flip-card-back"
       src="http://economybooks.info/daste/digeut.png"
@@ -185,15 +161,9 @@ a:hover {
   <img
     src="http://economybooks.info/daste/10.gif"
     alt="Email"
-    style="
-      max-width: 70px;
-      position: relative;
-      z-index: 77;
-    "
+    style="max-width:70px;position:relative;z-index:77;"
   >
 </a>
-
-<!-- Slideshow -->
 
 <div class="container" onclick="plusSlides(1, 0)">
   <div class="thing">
@@ -233,7 +203,6 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!slides.length) return;
 
   slideIndex[0] = Math.floor(Math.random() * slides.length) + 1;
-
   showSlides(slideIndex[0], 0);
 });
 
@@ -281,7 +250,7 @@ topCard.addEventListener("keydown", function (event) {
   }
 });
 
-/* Ballpoint pens */
+/* Ballpoint drawing */
 
 (function () {
   "use strict";
@@ -289,556 +258,630 @@ topCard.addEventListener("keydown", function (event) {
   var cursorCanvas = document.getElementById("ink-trail");
   var cursorContext = cursorCanvas.getContext("2d");
 
-  var automaticCanvas = document.getElementById("automatic-ink");
-  var automaticContext = automaticCanvas.getContext("2d");
-
-  var viewportWidth = window.innerWidth;
-  var viewportHeight = window.innerHeight;
-  var pixelRatio = 1;
-
-  var points = [];
-
-  var trailLength = 7575;
-  var trailLifetime = 19000;
-
-  var fullTurn = Math.PI * 2;
+  var autoCanvas = document.getElementById("automatic-ink");
+  var autoContext = autoCanvas.getContext("2d");
 
   /*
     AUTOMATIC PEN SETTINGS
 
-    Speed is measured along the line in pixels per second,
-    rather than in laps.
+    Increase speedMultiplier for faster movement.
+    Width stays independent of speed.
 
-    Increase speedMultiplier to make everything faster.
-    For example: 1.5 or 2.
-
-    Thickness is independent of speed.
+    Pauses and pen lifts are chosen at random intervals.
   */
 
   var speedMultiplier = 1;
-
   var minimumSpeed = 1800;
   var maximumSpeed = 6500;
 
-  var minimumPenWidth = 1.15;
-  var maximumPenWidth = 1.85;
+  var minimumWidth = 1.1;
+  var maximumWidth = 1.8;
 
   var edgeMargin = 28;
 
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var dpr = 1;
+
+  var trailLength = 7575;
+  var trailLifetime = 19000;
+  var cursorPoints = [];
+  var cursorDirty = false;
+
+  var position = null;
+  var heading = Math.random() * Math.PI * 2;
+  var direction = Math.random() < 0.5 ? -1 : 1;
+
+  var mode = "orbit";
+  var gesturesRemaining = 0;
+
+  var path = null;
+  var pathDistance = 0;
+  var pathIndex = 1;
+
+  var state = "draw";
+  var stateRemaining = 2;
+  var previousInkPoint = null;
+
   var currentSpeed = 3400;
   var targetSpeed = 3400;
-  var speedChangeCountdown = 0;
+  var speedTimer = 0;
   var speedResponse = 12;
 
-  var angle = Math.random() * fullTurn;
-  var elapsed = 0;
+  var inkDistance = 0;
   var lastFrameTime = null;
-  var previousAutomaticPoint = null;
 
-  var seed = Math.floor(Math.random() * 2147483647);
+  var phaseA = Math.random() * 100;
+  var phaseB = Math.random() * 100;
 
-  function randomBetween(minimum, maximum) {
-    return minimum + Math.random() * (maximum - minimum);
+  function random(min, max) {
+    return min + Math.random() * (max - min);
   }
 
-  function distanceBetween(a, b) {
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function distance(a, b) {
     return Math.hypot(b.x - a.x, b.y - a.y);
   }
 
-  /*
-    Smooth random noise.
-
-    Unlike a repeating sine-wave pattern, each successive
-    section gets new random values, smoothly joined together.
-    No growing list of path points is needed.
-  */
-
-  function randomValue(index, channel) {
-    var value =
-      Math.imul(index | 0, 374761393) ^
-      Math.imul(channel | 0, 668265263) ^
-      seed;
-
-    value = Math.imul(value ^ (value >>> 13), 1274126177);
-    value ^= value >>> 16;
-
-    return (value >>> 0) / 4294967295;
+  function margin() {
+    return Math.min(edgeMargin, w * 0.12, h * 0.12);
   }
 
-  function noise(position, channel) {
-    var index = Math.floor(position);
-    var fraction = position - index;
+  function bounded(point) {
+    var m = margin() + 4;
 
-    var smooth =
-      fraction * fraction * fraction *
-      (fraction * (fraction * 6 - 15) + 10);
-
-    var a = randomValue(index, channel);
-    var b = randomValue(index + 1, channel);
-
-    return a + (b - a) * smooth;
+    return {
+      x: clamp(point.x, Math.min(m, w / 2), Math.max(w / 2, w - m)),
+      y: clamp(point.y, Math.min(m, h / 2), Math.max(h / 2, h - m))
+    };
   }
 
-  function signedNoise(position, channel) {
-    return noise(position, channel) * 2 - 1;
+  function orbitPoint(angle, radius) {
+    var m = margin() + 6;
+
+    return bounded({
+      x: w / 2 + Math.cos(angle) * Math.max(1, w / 2 - m) * radius,
+      y: h / 2 + Math.sin(angle) * Math.max(1, h / 2 - m) * radius
+    });
   }
 
-  function makePoint(x, y, time, width, automatic) {
-    var jitter = automatic ? 0.35 : 0.8;
+  function makeInkPoint(x, y, time, width, automatic) {
+    var jitter = automatic ? 0.4 : 0.8;
 
     return {
       x: x,
       y: y,
       time: time,
-      offsetX: (Math.random() - 0.5) * jitter,
-      offsetY: (Math.random() - 0.5) * jitter,
       width: width,
+      offsetX: random(-jitter / 2, jitter / 2),
+      offsetY: random(-jitter / 2, jitter / 2),
       dryness: Math.random(),
       fleck: Math.random() > (automatic ? 0.94 : 0.82),
-      fleckX: (Math.random() - 0.5) * 4,
-      fleckY: (Math.random() - 0.5) * 4
+      fleckX: random(-2, 2),
+      fleckY: random(-2, 2)
     };
   }
 
-  /* Shared ballpoint texture */
+  function drawSegment(context, a, b, fade) {
+    var dryness = b.dryness < 0.13 ? 0.22 : 1;
 
-  function drawInkSegment(context, previous, current, fade) {
-    var dryness = current.dryness < 0.13 ? 0.22 : 1;
+    var ax = a.x + a.offsetX;
+    var ay = a.y + a.offsetY;
+    var bx = b.x + b.offsetX;
+    var by = b.y + b.offsetY;
 
-    var startX = previous.x + previous.offsetX;
-    var startY = previous.y + previous.offsetY;
-    var endX = current.x + current.offsetX;
-    var endY = current.y + current.offsetY;
-
-    var middleX =
-      (startX + endX) / 2 +
-      (current.dryness - 0.5) * 0.8;
-
-    var middleY =
-      (startY + endY) / 2 +
-      (0.5 - current.dryness) * 0.8;
+    var mx = (ax + bx) / 2 + (b.dryness - 0.5) * 0.8;
+    var my = (ay + by) / 2 + (0.5 - b.dryness) * 0.8;
 
     context.lineCap = "round";
     context.lineJoin = "round";
 
     context.beginPath();
-    context.moveTo(startX, startY);
-    context.quadraticCurveTo(middleX, middleY, endX, endY);
-
-    context.lineWidth = current.width;
+    context.moveTo(ax, ay);
+    context.quadraticCurveTo(mx, my, bx, by);
+    context.lineWidth = b.width;
     context.strokeStyle =
       "rgba(54,49,192," + (0.40 * fade * dryness) + ")";
-
     context.stroke();
 
     context.beginPath();
-    context.moveTo(startX + 0.35, startY - 0.2);
-
+    context.moveTo(ax + 0.35, ay - 0.2);
     context.quadraticCurveTo(
-      middleX + 0.2,
-      middleY - 0.25,
-      endX + 0.25,
-      endY - 0.15
+      mx + 0.2, my - 0.25,
+      bx + 0.25, by - 0.15
     );
-
-    context.lineWidth = Math.max(0.35, current.width * 0.38);
-    context.strokeStyle =
-      "rgba(85,75,216," + (0.22 * fade) + ")";
-
+    context.lineWidth = Math.max(0.35, b.width * 0.38);
+    context.strokeStyle = "rgba(85,75,216," + (0.22 * fade) + ")";
     context.stroke();
 
-    if (current.fleck) {
+    if (b.fleck) {
       context.beginPath();
-
       context.arc(
-        endX + current.fleckX,
-        endY + current.fleckY,
-        0.3 + current.dryness * 0.45,
+        bx + b.fleckX,
+        by + b.fleckY,
+        0.3 + b.dryness * 0.45,
         0,
-        fullTurn
+        Math.PI * 2
       );
-
-      context.fillStyle =
-        "rgba(54,49,192," + (0.22 * fade) + ")";
-
+      context.fillStyle = "rgba(54,49,192," + (0.22 * fade) + ")";
       context.fill();
     }
   }
 
-  /* Original fading cursor trail */
+  /* Cursor drawing: original fading behavior */
 
-  function trimTrailLength() {
-    var totalLength = 0;
+  function trimCursorTrail() {
+    var total = 0;
 
-    for (var i = points.length - 1; i > 0; i--) {
-      var newer = points[i];
-      var older = points[i - 1];
+    for (var i = cursorPoints.length - 1; i > 0; i--) {
+      var newer = cursorPoints[i];
+      var older = cursorPoints[i - 1];
+      var length = distance(newer, older);
 
-      var sectionLength = distanceBetween(newer, older);
+      if (total + length > trailLength) {
+        var ratio = (trailLength - total) / length;
 
-      if (totalLength + sectionLength > trailLength) {
-        var ratio =
-          (trailLength - totalLength) / sectionLength;
-
-        var cutPoint = {
+        var cut = Object.assign({}, older, {
           x: newer.x + (older.x - newer.x) * ratio,
           y: newer.y + (older.y - newer.y) * ratio,
           time: newer.time + (older.time - newer.time) * ratio,
+          width: newer.width + (older.width - newer.width) * ratio,
           offsetX: 0,
           offsetY: 0,
-          width: newer.width + (older.width - newer.width) * ratio,
-          dryness: older.dryness,
-          fleck: false,
-          fleckX: 0,
-          fleckY: 0
-        };
+          fleck: false
+        });
 
-        points.splice(0, i, cutPoint);
+        cursorPoints.splice(0, i, cut);
         break;
       }
 
-      totalLength += sectionLength;
+      total += length;
     }
   }
 
   function addCursorPoint(x, y, time) {
-    var previous =
-      points.length ? points[points.length - 1] : null;
+    var previous = cursorPoints[cursorPoints.length - 1];
+    var movement = previous ? distance(previous, {x:x, y:y}) : 0;
 
-    if (
-      previous &&
-      distanceBetween(previous, { x: x, y: y }) < 1.2
-    ) {
-      return;
-    }
+    if (previous && movement < 1.2) return;
 
-    var speed = 0.2;
+    var speed = previous
+      ? movement / Math.max(1, time - previous.time)
+      : 0.2;
 
-    if (previous) {
-      speed =
-        distanceBetween(previous, { x: x, y: y }) /
-        Math.max(1, time - previous.time);
-    }
+    var width = Math.max(1.5, Math.min(3.2, 2.8 - speed * 1.1));
 
-    var width =
-      Math.max(1.5, Math.min(3.2, 2.8 - speed * 1.1));
-
-    points.push(makePoint(x, y, time, width, false));
-
-    trimTrailLength();
+    cursorPoints.push(makeInkPoint(x, y, time, width, false));
+    trimCursorTrail();
+    cursorDirty = true;
   }
 
-  function drawCursorTrail(time) {
-    cursorContext.clearRect(
-      0,
-      0,
-      viewportWidth,
-      viewportHeight
-    );
+  function drawCursor(time) {
+    if (!cursorPoints.length && !cursorDirty) return;
+
+    cursorContext.clearRect(0, 0, w, h);
 
     while (
-      points.length &&
-      time - points[0].time > trailLifetime
+      cursorPoints.length &&
+      time - cursorPoints[0].time > trailLifetime
     ) {
-      points.shift();
+      cursorPoints.shift();
     }
 
-    for (var i = 1; i < points.length; i++) {
-      var age = (time - points[i].time) / trailLifetime;
-      var fade = Math.max(0, 1 - age);
+    for (var i = 1; i < cursorPoints.length; i++) {
+      var fade = Math.max(
+        0,
+        1 - (time - cursorPoints[i].time) / trailLifetime
+      );
 
-      drawInkSegment(
+      drawSegment(
         cursorContext,
-        points[i - 1],
-        points[i],
+        cursorPoints[i - 1],
+        cursorPoints[i],
         fade
       );
     }
+
+    cursorDirty = cursorPoints.length > 0;
   }
 
   window.addEventListener("pointermove", function (event) {
     if (event.pointerType === "touch") return;
 
-    var movements = event.getCoalescedEvents
+    var events = event.getCoalescedEvents
       ? event.getCoalescedEvents()
       : [];
 
-    if (!movements.length) movements = [event];
+    if (!events.length) events = [event];
 
-    for (var i = 0; i < movements.length; i++) {
+    events.forEach(function (movement) {
       addCursorPoint(
-        movements[i].clientX,
-        movements[i].clientY,
-        movements[i].timeStamp
+        movement.clientX,
+        movement.clientY,
+        movement.timeStamp
       );
-    }
-  }, { passive: true });
+    });
+  }, {passive:true});
 
-  /* Automatic irregular drawing */
+  /*
+    Automatic movement uses changing curved gestures.
 
-  function automaticPosition(a) {
-    var margin = Math.min(
-      edgeMargin,
-      viewportWidth * 0.12,
-      viewportHeight * 0.12
-    );
+    Each gesture is sampled by distance, so speed follows
+    the actual line rather than a fixed angular rotation.
+  */
 
-    var radiusX = Math.max(
-      1,
-      viewportWidth / 2 - margin - 5
-    );
-
-    var radiusY = Math.max(
-      1,
-      viewportHeight / 2 - margin - 5
-    );
-
-    /*
-      Large, unpredictable contractions and expansions,
-      with smaller irregularities layered over them.
-
-      The angle is never reset after a lap:
-      each new round travels through fresh random terrain.
-    */
-
-    var radius =
-      0.64 +
-      0.20 * signedNoise(a * 0.61, 1) +
-      0.10 * signedNoise(a * 1.73, 2) +
-      0.035 * signedNoise(a * 4.9, 3) +
-      0.012 * signedNoise(a * 13.7, 4);
-
-    /*
-      Uneven horizontal and vertical proportions change
-      independently, so the loops do not stay concentric.
-    */
-
-    var stretchX =
-      0.92 + 0.08 * signedNoise(a * 0.83, 5);
-
-    var stretchY =
-      0.92 + 0.08 * signedNoise(a * 0.97, 6);
-
-    var handX =
-      0.65 * signedNoise(a * 47.3, 7);
-
-    var handY =
-      0.65 * signedNoise(a * 51.1, 8);
+  function cubic(a, b, c, d, t) {
+    var u = 1 - t;
 
     return {
       x:
-        viewportWidth / 2 +
-        Math.cos(a) * radiusX * radius * stretchX +
-        handX,
+        u*u*u*a.x +
+        3*u*u*t*b.x +
+        3*u*t*t*c.x +
+        t*t*t*d.x,
 
       y:
-        viewportHeight / 2 +
-        Math.sin(a) * radiusY * radius * stretchY +
-        handY
+        u*u*u*a.y +
+        3*u*u*t*b.y +
+        3*u*t*t*c.y +
+        t*t*t*d.y
     };
   }
 
+  function createGesture() {
+    if (gesturesRemaining <= 0) {
+      mode = Math.random() < 0.60 ? "orbit" : "wander";
+
+      gesturesRemaining = mode === "orbit"
+        ? Math.floor(random(3, 11))
+        : Math.floor(random(1, 6));
+
+      if (Math.random() < 0.28) direction *= -1;
+    }
+
+    gesturesRemaining--;
+
+    var start = {x:position.x, y:position.y};
+    var target;
+    var arrivalHeading;
+
+    if (mode === "orbit") {
+      var a = Math.atan2(
+        (start.y - h / 2) / Math.max(1, h / 2),
+        (start.x - w / 2) / Math.max(1, w / 2)
+      );
+
+      a += direction * random(0.45, 1.65);
+
+      target = orbitPoint(a, random(0.40, 0.97));
+
+      arrivalHeading =
+        Math.atan2(
+          Math.cos(a) * h * direction,
+          -Math.sin(a) * w * direction
+        ) + random(-0.65, 0.65);
+    } else {
+      /* Free crossings, inward excursions and loose turns. */
+
+      target = bounded({
+        x: random(w * 0.08, w * 0.92),
+        y: random(h * 0.08, h * 0.92)
+      });
+
+      arrivalHeading = Math.random() * Math.PI * 2;
+    }
+
+    var length = Math.max(20, distance(start, target));
+    var handleA = length * random(0.22, 0.75);
+    var handleB = length * random(0.22, 0.85);
+
+    /*
+      Matching the departure direction to the previous
+      gesture makes consecutive strokes flow together.
+    */
+
+    var controlA = bounded({
+      x: start.x + Math.cos(heading) * handleA,
+      y: start.y + Math.sin(heading) * handleA
+    });
+
+    var controlB = bounded({
+      x: target.x - Math.cos(arrivalHeading) * handleB,
+      y: target.y - Math.sin(arrivalHeading) * handleB
+    });
+
+    var actualArrival = Math.atan2(
+      target.y - controlB.y,
+      target.x - controlB.x
+    );
+
+    /*
+      All control points are inside the safe area.
+      The entire Bézier curve therefore stays inside it.
+    */
+
+    var estimatedLength =
+      distance(start, controlA) +
+      distance(controlA, controlB) +
+      distance(controlB, target);
+
+    var samples = Math.max(
+      80,
+      Math.min(700, Math.ceil(estimatedLength / 3))
+    );
+
+    var table = [{x:start.x, y:start.y, distance:0}];
+    var total = 0;
+    var previous = start;
+
+    for (var i = 1; i <= samples; i++) {
+      var point = cubic(
+        start,
+        controlA,
+        controlB,
+        target,
+        i / samples
+      );
+
+      total += distance(previous, point);
+
+      table.push({
+        x: point.x,
+        y: point.y,
+        distance: total
+      });
+
+      previous = point;
+    }
+
+    path = {
+      table: table,
+      length: total,
+      arrivalHeading: actualArrival
+    };
+
+    pathDistance = 0;
+    pathIndex = 1;
+  }
+
+  function pointOnPath(travel) {
+    var table = path.table;
+
+    while (
+      pathIndex < table.length - 1 &&
+      table[pathIndex].distance < travel
+    ) {
+      pathIndex++;
+    }
+
+    var a = table[pathIndex - 1];
+    var b = table[pathIndex];
+
+    var ratio = clamp(
+      (travel - a.distance) /
+      Math.max(0.000001, b.distance - a.distance),
+      0,
+      1
+    );
+
+    return {
+      x: a.x + (b.x - a.x) * ratio,
+      y: a.y + (b.y - a.y) * ratio
+    };
+  }
+
+  function leaveInk(point) {
+    /*
+      Subtle nib wobble is measured along the drawing,
+      so stopping never changes the line or adds ink.
+    */
+
+    var x = point.x +
+      Math.sin(inkDistance * 0.073 + phaseA) * 0.45;
+
+    var y = point.y +
+      Math.sin(inkDistance * 0.091 + phaseB) * 0.45;
+
+    var pressure =
+      0.5 +
+      0.32 * Math.sin(inkDistance * 0.009 + phaseA) +
+      0.18 * Math.sin(inkDistance * 0.027 + phaseB);
+
+    var width =
+      minimumWidth +
+      (maximumWidth - minimumWidth) * pressure;
+
+    var next = makeInkPoint(x, y, 0, width, true);
+
+    if (previousInkPoint) {
+      if (distance(previousInkPoint, next) < 1.4) return;
+
+      drawSegment(autoContext, previousInkPoint, next, 1);
+    }
+
+    previousInkPoint = next;
+  }
+
+  function movePen(amount, drawing) {
+    var remaining = amount;
+
+    while (remaining > 0.00001) {
+      if (!path) createGesture();
+
+      var available = path.length - pathDistance;
+
+      if (available < 0.00001) {
+        heading = path.arrivalHeading;
+        path = null;
+        continue;
+      }
+
+      var step = Math.min(2, remaining, available);
+
+      pathDistance += step;
+      remaining -= step;
+      inkDistance += step;
+
+      position = pointOnPath(pathDistance);
+
+      if (drawing) leaveInk(position);
+
+      if (pathDistance >= path.length - 0.00001) {
+        heading = path.arrivalHeading;
+        path = null;
+      }
+    }
+  }
+
   /*
-    Estimate how much physical line a small angular movement
-    produces. This lets the pen follow an actual drawing speed,
-    including through inward/outward bends.
+    draw: moving with ink
+    pause: fully stationary, no new ink
+    lift: moving without ink
   */
 
-  function pathRate(a) {
-    var epsilon = 0.0001;
-    var before = automaticPosition(a - epsilon);
-    var after = automaticPosition(a + epsilon);
+  function changeState() {
+    if (state === "draw") {
+      if (Math.random() < 0.48) {
+        state = "pause";
 
-    return Math.max(
-      1,
-      distanceBetween(before, after) / (epsilon * 2)
-    );
+        stateRemaining = Math.random() < 0.20
+          ? random(1.1, 2.8)
+          : random(0.10, 0.75);
+      } else {
+        state = "lift";
+        stateRemaining = random(0.07, 0.42);
+        previousInkPoint = null;
+
+        /* Occasionally reposition along a completely new gesture. */
+        if (Math.random() < 0.65) {
+          path = null;
+          mode = "wander";
+          gesturesRemaining = Math.floor(random(1, 4));
+          heading = Math.random() * Math.PI * 2;
+        }
+      }
+    } else if (state === "pause" && Math.random() < 0.30) {
+      state = "lift";
+      stateRemaining = random(0.08, 0.35);
+      previousInkPoint = null;
+    } else {
+      state = "draw";
+
+      stateRemaining = Math.random() < 0.25
+        ? random(0.10, 0.45)
+        : random(0.65, 3.8);
+
+      if (!previousInkPoint) leaveInk(position);
+    }
   }
 
   function updateSpeed(seconds) {
-    speedChangeCountdown -= seconds;
+    speedTimer -= seconds;
 
-    if (speedChangeCountdown <= 0) {
+    if (speedTimer <= 0) {
       var choice = Math.random();
 
-      if (choice < 0.28) {
-        /* Sudden fast sweep */
-        targetSpeed = randomBetween(4800, maximumSpeed);
-      } else if (choice < 0.52) {
-        /* Brief slower passage, still moving briskly */
-        targetSpeed = randomBetween(minimumSpeed, 2800);
+      if (choice < 0.30) {
+        targetSpeed = random(4800, maximumSpeed);
+      } else if (choice < 0.55) {
+        targetSpeed = random(minimumSpeed, 2800);
       } else {
-        targetSpeed = randomBetween(2800, 4800);
+        targetSpeed = random(2800, 4800);
       }
 
-      /*
-        Both the timing and sharpness of the next
-        speed change are randomized.
-      */
-
-      speedChangeCountdown = randomBetween(0.10, 0.65);
-      speedResponse = randomBetween(7, 24);
+      speedTimer = random(0.09, 0.65);
+      speedResponse = random(8, 26);
     }
 
     currentSpeed +=
       (targetSpeed - currentSpeed) *
       (1 - Math.exp(-speedResponse * seconds));
 
-    currentSpeed = Math.max(
+    currentSpeed = clamp(
+      currentSpeed,
       minimumSpeed,
-      Math.min(maximumSpeed, currentSpeed)
+      maximumSpeed
     );
   }
 
-  function advanceAutomaticPen(seconds) {
+  function updateAutomatic(seconds) {
     var remaining = seconds;
 
-    /*
-      Small spatial steps prevent angular corners and
-      long straight shortcuts even during very fast sweeps.
-    */
-
     while (remaining > 0.000001) {
-      var effectiveSpeed =
-        currentSpeed * speedMultiplier;
+      if (stateRemaining <= 0.000001) {
+        changeState();
+      }
 
-      var stepTime = Math.min(
+      var step = Math.min(
         remaining,
-        2 / Math.max(1, effectiveSpeed),
+        stateRemaining,
         1 / 120
       );
 
-      updateSpeed(stepTime);
+      if (state !== "pause") {
+        updateSpeed(step);
 
-      effectiveSpeed = currentSpeed * speedMultiplier;
-
-      var travelDistance = effectiveSpeed * stepTime;
-
-      /*
-        Midpoint integration follows the irregular curve
-        more evenly than a fixed angular increment.
-      */
-
-      var firstRate = pathRate(angle);
-      var middleAngle =
-        angle + travelDistance / firstRate / 2;
-
-      angle += travelDistance / pathRate(middleAngle);
-
-      elapsed += stepTime;
-      remaining -= stepTime;
-
-      var position = automaticPosition(angle);
-
-      /*
-        Pressure varies gently along the stroke,
-        completely independently of drawing speed.
-      */
-
-      var pressure = noise(angle * 3.8, 12);
-
-      var width =
-        minimumPenWidth +
-        (maximumPenWidth - minimumPenWidth) * pressure;
-
-      var currentPoint = makePoint(
-        position.x,
-        position.y,
-        elapsed * 1000,
-        width,
-        true
-      );
-
-      if (!previousAutomaticPoint) {
-        previousAutomaticPoint = currentPoint;
-        continue;
+        movePen(
+          currentSpeed * speedMultiplier * step,
+          state === "draw"
+        );
       }
 
-      /*
-        Wait until there is enough movement to add ink.
-        This avoids repeatedly painting the same spot.
-      */
-
-      if (
-        distanceBetween(previousAutomaticPoint, currentPoint) < 1.4
-      ) {
-        continue;
-      }
-
-      drawInkSegment(
-        automaticContext,
-        previousAutomaticPoint,
-        currentPoint,
-        1
-      );
-
-      previousAutomaticPoint = currentPoint;
+      stateRemaining -= step;
+      remaining -= step;
     }
   }
 
-  /* Preserve accumulated ink when the window changes size. */
+  /* Preserve permanent ink across window resizing. */
 
   function resizeCanvases() {
-    var savedInk = document.createElement("canvas");
+    var saved = document.createElement("canvas");
 
-    savedInk.width = automaticCanvas.width;
-    savedInk.height = automaticCanvas.height;
+    saved.width = autoCanvas.width;
+    saved.height = autoCanvas.height;
+    saved.getContext("2d").drawImage(autoCanvas, 0, 0);
 
-    savedInk.getContext("2d").drawImage(
-      automaticCanvas,
-      0,
-      0
-    );
+    var oldW = w;
+    var oldH = h;
 
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
-    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    [cursorCanvas, automaticCanvas].forEach(function (canvas) {
-      canvas.width =
-        Math.round(viewportWidth * pixelRatio);
-
-      canvas.height =
-        Math.round(viewportHeight * pixelRatio);
-
-      canvas.style.width = viewportWidth + "px";
-      canvas.style.height = viewportHeight + "px";
+    [cursorCanvas, autoCanvas].forEach(function (canvas) {
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
 
       canvas.getContext("2d").setTransform(
-        pixelRatio,
-        0,
-        0,
-        pixelRatio,
-        0,
-        0
+        dpr, 0, 0, dpr, 0, 0
       );
     });
 
-    if (savedInk.width && savedInk.height) {
-      automaticContext.drawImage(
-        savedInk,
-        0,
-        0,
-        savedInk.width,
-        savedInk.height,
-        0,
-        0,
-        viewportWidth,
-        viewportHeight
+    if (saved.width && saved.height) {
+      autoContext.drawImage(
+        saved,
+        0, 0, saved.width, saved.height,
+        0, 0, w, h
       );
     }
 
-    var position = automaticPosition(angle);
+    position = position
+      ? bounded({
+          x: position.x * w / Math.max(1, oldW),
+          y: position.y * h / Math.max(1, oldH)
+        })
+      : orbitPoint(Math.random() * Math.PI * 2, 0.8);
 
-    previousAutomaticPoint = makePoint(
-      position.x,
-      position.y,
-      elapsed * 1000,
-      minimumPenWidth,
-      true
-    );
+    path = null;
+    previousInkPoint = null;
 
-    points.length = 0;
+    cursorPoints.length = 0;
+    cursorDirty = false;
   }
 
   window.addEventListener("resize", resizeCanvases);
@@ -848,14 +891,7 @@ topCard.addEventListener("keydown", function (event) {
   });
 
   function animate(time) {
-    if (lastFrameTime === null) {
-      lastFrameTime = time;
-    }
-
-    /*
-      Avoid a huge catch-up stroke after a stalled frame
-      or after returning from another browser tab.
-    */
+    if (lastFrameTime === null) lastFrameTime = time;
 
     var seconds = Math.min(
       (time - lastFrameTime) / 1000,
@@ -865,8 +901,8 @@ topCard.addEventListener("keydown", function (event) {
     lastFrameTime = time;
 
     if (!document.hidden) {
-      advanceAutomaticPen(seconds);
-      drawCursorTrail(time);
+      updateAutomatic(seconds);
+      drawCursor(time);
     }
 
     requestAnimationFrame(animate);
