@@ -742,41 +742,27 @@ topCard.addEventListener("keydown", function (event) {
     lift: moving without ink
   */
 
-  function changeState() {
-    if (state === "draw") {
-      if (Math.random() < 0.48) {
-        state = "pause";
+function changeState() {
+  if (state === "draw") {
+var state = "pause";
+var stateRemaining = random(10, 30);
+    previousInkPoint = null;
+  } else if (state === "pause") {
+    // Brief invisible movement before drawing somewhere else.
+    state = "lift";
+    stateRemaining = random(0.10, 0.55);
 
-        stateRemaining = Math.random() < 0.20
-          ? random(1.1, 2.8)
-          : random(0.10, 0.75);
-      } else {
-        state = "lift";
-        stateRemaining = random(0.07, 0.42);
-        previousInkPoint = null;
-
-        /* Occasionally reposition along a completely new gesture. */
-        if (Math.random() < 0.65) {
-          path = null;
-          mode = "wander";
-          gesturesRemaining = Math.floor(random(1, 4));
-          heading = Math.random() * Math.PI * 2;
-        }
-      }
-    } else if (state === "pause" && Math.random() < 0.30) {
-      state = "lift";
-      stateRemaining = random(0.08, 0.35);
-      previousInkPoint = null;
-    } else {
-      state = "draw";
-
-      stateRemaining = Math.random() < 0.25
-        ? random(0.10, 0.45)
-        : random(0.65, 3.8);
-
-      if (!previousInkPoint) leaveInk(position);
-    }
+    path = null;
+    mode = Math.random() < 0.5 ? "wander" : "orbit";
+    gesturesRemaining = Math.floor(random(1, 5));
+    heading = Math.random() * Math.PI * 2;
+  } else {
+    state = "draw";
+    stateRemaining = random(0.2, 1.2);
+    previousInkPoint = null;
+    leaveInk(position);
   }
+}
 
   function updateSpeed(seconds) {
     speedTimer -= seconds;
