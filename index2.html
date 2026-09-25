@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>ㄷ</title>
+
+<meta name="description" content="">
+<meta name="author" content="">
+<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  margin: 18px;
+  font: 13px/14.5px Arial, sans-serif;
+  color: dimgrey;
+  overflow: hidden;
+  text-rendering: geometricPrecision;
+}
+
+/* Transparent drawing layers */
+
+#automatic-ink,
+#ink-trail {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+#automatic-ink {
+  z-index: 99998;
+}
+
+#ink-trail {
+  z-index: 99999;
+}
+
+.container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -1;
+  transform: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container p {
+  position: absolute;
+  bottom: 6px;
+  left: 18px;
+  z-index: 10;
+}
+
+.container img {
+  position: relative;
+  z-index: 1;
+  max-height: 72vh;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+img {
+  cursor: pointer;
+  user-drag: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.horizon {
+  max-width: 840px;
+}
+
+.squarish {
+  max-width: 520px;
+}
+
+/* Top-left flipping card */
+
+.flip-card {
+  width: 270px;
+  max-width: calc(100vw - 36px);
+  perspective: 1000px;
+  position: relative;
+  z-index: 77;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.flip-card-inner {
+  display: grid;
+  transition: transform 0.65s ease;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+#visible:hover {
+  text-decoration: none;
+}
+
+@media screen and (max-width: 960px) {
+  .container p {
+    max-width: calc(100vw - 36px);
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-height: 40vh;
+    overflow-y: auto;
+    bottom: 36px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Permanent automatic drawing -->
+<canvas id="automatic-ink" aria-hidden="true"></canvas>
+
+<!-- Fading cursor drawing -->
+<canvas id="ink-trail" aria-hidden="true"></canvas>
+
+<!-- Top-left flipping image -->
+
+<div
+  class="flip-card"
+  id="top-card"
+  role="button"
+  tabindex="0"
+  aria-label="Flip card"
+  aria-pressed="false"
+>
+  <div class="flip-card-inner">
+    <img
+      class="flip-card-front"
+      src="https://upload.wikimedia.org/wikipedia/commons/0/03/%E3%84%B7_%28digeut%29_stroke_order.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+      alt="Front of card"
+    >
+
+    <img
+      class="flip-card-back"
+      src="http://economybooks.info/daste/digeut.png"
+      alt="Back of card"
+    >
+  </div>
+</div>
+
+<br><br>
+
+<a href="mailto:z99zzd@proton.me" target="_blank">
+  <img
+    src="http://economybooks.info/daste/10.gif"
+    alt="Email"
+    style="
+      max-width: 70px;
+      position: relative;
+      z-index: 77;
+    "
+  >
+</a>
+
+<!-- Slideshow -->
+
+<div class="container" onclick="plusSlides(1, 0)">
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/cover1.jpeg"
+      alt=""
+    >
+  </div>
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/poster1.jpeg"
+      alt=""
+    >
+  </div>
+
+  <div class="thing">
+    <img
+      class="horizon"
+      src="http://economybooks.info/daste/sticker1.png"
+      alt=""
+    >
+  </div>
+</div>
+
+<script>
+/* Slideshow */
+
+var slideId = ["thing"];
+var slideIndex = [0];
+
+document.addEventListener("DOMContentLoaded", function () {
+  var slides = document.getElementsByClassName(slideId[0]);
+
+  if (!slides.length) return;
+
+  slideIndex[0] = Math.floor(Math.random() * slides.length) + 1;
+  showSlides(slideIndex[0], 0);
+});
+
+function plusSlides(n, no) {
+  showSlides(slideIndex[no] += n, no);
+}
+
+function showSlides(n, no) {
+  var slides = document.getElementsByClassName(slideId[no]);
+
+  if (!slides.length) return;
+
+  if (n > slides.length) slideIndex[no] = 1;
+  if (n < 1) slideIndex[no] = slides.length;
+
+  for (var i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+
+  slides[slideIndex[no] - 1].style.display = "block";
+}
+
+/* Flipping card */
+
+var topCard = document.getElementById("top-card");
+
+function flipTopCard() {
+  topCard.classList.toggle("flipped");
+
+  topCard.setAttribute(
+    "aria-pressed",
+    topCard.classList.contains("flipped")
+  );
+}
+
+topCard.addEventListener("click", function (event) {
+  event.stopPropagation();
+  flipTopCard();
+});
+
+topCard.addEventListener("keydown", function (event) {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    flipTopCard();
+  }
+});
+
+/* Ballpoint drawing */
+
+(function () {
+  "use strict";
+
+  var cursorCanvas = document.getElementById("ink-trail");
+  var cursorContext = cursorCanvas.getContext("2d");
+
+  var automaticCanvas = document.getElementById("automatic-ink");
+  var automaticContext = automaticCanvas.getContext("2d");
+
+  var viewportWidth = window.innerWidth;
+  var viewportHeight = window.innerHeight;
+  var pixelRatio = 1;
+
+  var points = [];
+
+  var trailLength = 7575;
+  var trailLifetime = 19000;
+
+  var inkRed = 54;
+  var inkGreen = 49;
+  var inkBlue = 192;
+
+  /*
+    AUTOMATIC PEN SETTINGS
+
+    Higher lapSeconds = slower drawing.
+    Higher irregularity = more inward/outward wandering.
+    edgeMargin = minimum reserved space near window edges.
+  */
+
+  var lapSeconds = 80;
+  var irregularity = 1;
+  var edgeMargin = 32;
+
+  var fullTurn = Math.PI * 2;
+  var angle = Math.random() * fullTurn;
+  var elapsed = 0;
+  var lastFrameTime = null;
+  var previousAutomaticPoint = null;
+
+  /* Random starting phases give each visit a different drawing. */
+
+  var phases = [];
+
+  for (var p = 0; p < 12; p++) {
+    phases.push(Math.random() * fullTurn);
+  }
+
+  function distanceBetween(a, b) {
+    return Math.hypot(b.x - a.x, b.y - a.y);
+  }
+
+  function makePoint(x, y, time, width) {
+    return {
+      x: x,
+      y: y,
+      time: time,
+      offsetX: (Math.random() - 0.5) * 0.8,
+      offsetY: (Math.random() - 0.5) * 0.8,
+      width: width,
+      dryness: Math.random(),
+      fleck: Math.random() > 0.82,
+      fleckX: (Math.random() - 0.5) * 4,
+      fleckY: (Math.random() - 0.5) * 4
+    };
+  }
+
+  /*
+    Both pens use the same ink:
+    a soft main stroke, a finer displaced stroke,
+    small dry sections, and occasional flecks.
+  */
+
+  function drawInkSegment(context, previous, current, fade) {
+    var dryness = current.dryness < 0.13 ? 0.22 : 1;
+
+    var startX = previous.x + previous.offsetX;
+    var startY = previous.y + previous.offsetY;
+    var endX = current.x + current.offsetX;
+    var endY = current.y + current.offsetY;
+
+    var middleX =
+      (startX + endX) / 2 + (current.dryness - 0.5) * 0.8;
+
+    var middleY =
+      (startY + endY) / 2 + (0.5 - current.dryness) * 0.8;
+
+    context.lineCap = "round";
+    context.lineJoin = "round";
+
+    context.beginPath();
+    context.moveTo(startX, startY);
+    context.quadraticCurveTo(middleX, middleY, endX, endY);
+
+    context.lineWidth = current.width;
+    context.strokeStyle =
+      "rgba(" + inkRed + "," + inkGreen + "," + inkBlue + "," +
+      (0.40 * fade * dryness) + ")";
+
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(startX + 0.35, startY - 0.2);
+
+    context.quadraticCurveTo(
+      middleX + 0.2,
+      middleY - 0.25,
+      endX + 0.25,
+      endY - 0.15
+    );
+
+    context.lineWidth = Math.max(0.35, current.width * 0.38);
+    context.strokeStyle = "rgba(85,75,216," + (0.22 * fade) + ")";
+    context.stroke();
+
+    if (current.fleck) {
+      context.beginPath();
+
+      context.arc(
+        endX + current.fleckX,
+        endY + current.fleckY,
+        0.3 + current.dryness * 0.45,
+        0,
+        fullTurn
+      );
+
+      context.fillStyle =
+        "rgba(" + inkRed + "," + inkGreen + "," + inkBlue + "," +
+        (0.22 * fade) + ")";
+
+      context.fill();
+    }
+  }
+
+  /* Cursor trail */
+
+  function trimTrailLength() {
+    var totalLength = 0;
+
+    for (var i = points.length - 1; i > 0; i--) {
+      var newer = points[i];
+      var older = points[i - 1];
+      var sectionLength = distanceBetween(newer, older);
+
+      if (totalLength + sectionLength > trailLength) {
+        var ratio = (trailLength - totalLength) / sectionLength;
+
+        var cutPoint = {
+          x: newer.x + (older.x - newer.x) * ratio,
+          y: newer.y + (older.y - newer.y) * ratio,
+          time: newer.time + (older.time - newer.time) * ratio,
+          offsetX: 0,
+          offsetY: 0,
+          width: newer.width + (older.width - newer.width) * ratio,
+          dryness: older.dryness,
+          fleck: false,
+          fleckX: 0,
+          fleckY: 0
+        };
+
+        points.splice(0, i, cutPoint);
+        break;
+      }
+
+      totalLength += sectionLength;
+    }
+  }
+
+  function addCursorPoint(x, y, time) {
+    var previous = points.length ? points[points.length - 1] : null;
+
+    if (previous && distanceBetween(previous, { x: x, y: y }) < 1.2) {
+      return;
+    }
+
+    var speed = 0.2;
+
+    if (previous) {
+      speed =
+        distanceBetween(previous, { x: x, y: y }) /
+        Math.max(1, time - previous.time);
+    }
+
+    var width = Math.max(1.5, Math.min(3.2, 2.8 - speed * 1.1));
+
+    points.push(makePoint(x, y, time, width));
+    trimTrailLength();
+  }
+
+  function drawCursorTrail(time) {
+    cursorContext.clearRect(0, 0, viewportWidth, viewportHeight);
+
+    while (points.length && time - points[0].time > trailLifetime) {
+      points.shift();
+    }
+
+    for (var i = 1; i < points.length; i++) {
+      var age = (time - points[i].time) / trailLifetime;
+      var fade = Math.max(0, 1 - age);
+
+      drawInkSegment(cursorContext, points[i - 1], points[i], fade);
+    }
+  }
+
+  window.addEventListener("pointermove", function (event) {
+    if (event.pointerType === "touch") return;
+
+    var movements = event.getCoalescedEvents
+      ? event.getCoalescedEvents()
+      : [];
+
+    if (!movements.length) movements = [event];
+
+    for (var i = 0; i < movements.length; i++) {
+      addCursorPoint(
+        movements[i].clientX,
+        movements[i].clientY,
+        movements[i].timeStamp
+      );
+    }
+  }, { passive: true });
+
+  /* Invisible automatic pen */
+
+  function automaticPosition(a, t) {
+    var margin = Math.min(
+      edgeMargin,
+      viewportWidth * 0.12,
+      viewportHeight * 0.12
+    );
+
+    var radiusX = Math.max(1, viewportWidth / 2 - margin - 5);
+    var radiusY = Math.max(1, viewportHeight / 2 - margin - 5);
+
+    /*
+      Unequal frequencies and slow time drift prevent
+      successive laps from tracing the same shape.
+
+      Broad deviations create inward/outward wandering.
+      Smaller deviations create an uneven hand-drawn contour.
+    */
+
+    var broadWander =
+      0.090 * Math.sin(a * 2.13 + t * 0.037 + phases[0]) +
+      0.060 * Math.sin(a * 3.71 - t * 0.029 + phases[1]) +
+      0.035 * Math.sin(a * 5.27 + t * 0.019 + phases[2]);
+
+    var localWander =
+      0.016 * Math.sin(a * 8.63 + t * 0.13 + phases[3]) +
+      0.009 * Math.sin(a * 13.19 - t * 0.09 + phases[4]);
+
+    var radius = 0.75 + irregularity * (broadWander + localWander);
+
+    /* Keep the complete stroke comfortably within the window. */
+    radius = Math.max(0.40, Math.min(0.96, radius));
+
+    var handX =
+      0.65 * Math.sin(t * 2.1 + phases[5]) +
+      0.30 * Math.sin(t * 4.7 + phases[6]);
+
+    var handY =
+      0.65 * Math.sin(t * 1.8 + phases[7]) +
+      0.30 * Math.sin(t * 4.1 + phases[8]);
+
+    return {
+      x: viewportWidth / 2 + Math.cos(a) * radiusX * radius + handX,
+      y: viewportHeight / 2 + Math.sin(a) * radiusY * radius + handY
+    };
+  }
+
+  function advanceAutomaticPen(seconds) {
+    /*
+      Substeps keep curves smooth across different frame rates.
+      Only new ink is painted; previous automatic ink is retained.
+    */
+
+    var steps = Math.max(1, Math.ceil(seconds / (1 / 120)));
+    var stepTime = seconds / steps;
+
+    for (var i = 0; i < steps; i++) {
+      elapsed += stepTime;
+
+      var speedVariation =
+        1 +
+        0.22 * Math.sin(elapsed * 0.19 + phases[9]) +
+        0.12 * Math.sin(elapsed * 0.47 + phases[10]) +
+        0.07 * Math.sin(elapsed * 1.13 + phases[11]);
+
+      angle += (fullTurn / lapSeconds) * speedVariation * stepTime;
+
+      var position = automaticPosition(angle, elapsed);
+
+      if (!previousAutomaticPoint) {
+        previousAutomaticPoint = makePoint(
+          position.x,
+          position.y,
+          elapsed * 1000,
+          2.5
+        );
+        continue;
+      }
+
+      var distance = distanceBetween(previousAutomaticPoint, position);
+
+      /* Consistent spacing avoids ink density depending on frame rate. */
+      if (distance < 1.2) continue;
+
+      var timeDifference = Math.max(
+        1,
+        elapsed * 1000 - previousAutomaticPoint.time
+      );
+
+      var speed = distance / timeDifference;
+
+      var pressure =
+        0.90 +
+        0.10 * Math.sin(elapsed * 0.73 + phases[3]) +
+        0.05 * Math.sin(elapsed * 2.17 + phases[7]);
+
+      var width =
+        Math.max(1.5, Math.min(3.2, 2.8 - speed * 1.1)) * pressure;
+
+      var currentPoint = makePoint(
+        position.x,
+        position.y,
+        elapsed * 1000,
+        width
+      );
+
+      drawInkSegment(
+        automaticContext,
+        previousAutomaticPoint,
+        currentPoint,
+        1
+      );
+
+      previousAutomaticPoint = currentPoint;
+    }
+  }
+
+  /* Resize both layers while preserving the accumulated drawing. */
+
+  function resizeCanvases() {
+    var savedInk = document.createElement("canvas");
+
+    savedInk.width = automaticCanvas.width;
+    savedInk.height = automaticCanvas.height;
+
+    savedInk.getContext("2d").drawImage(automaticCanvas, 0, 0);
+
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
+    pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+    [cursorCanvas, automaticCanvas].forEach(function (canvas) {
+      canvas.width = Math.round(viewportWidth * pixelRatio);
+      canvas.height = Math.round(viewportHeight * pixelRatio);
+      canvas.style.width = viewportWidth + "px";
+      canvas.style.height = viewportHeight + "px";
+
+      canvas.getContext("2d").setTransform(
+        pixelRatio, 0, 0, pixelRatio, 0, 0
+      );
+    });
+
+    if (savedInk.width && savedInk.height) {
+      automaticContext.drawImage(
+        savedInk,
+        0,
+        0,
+        savedInk.width,
+        savedInk.height,
+        0,
+        0,
+        viewportWidth,
+        viewportHeight
+      );
+    }
+
+    /*
+      Reposition the invisible nib after resizing so it does
+      not draw a connecting slash across the page.
+    */
+
+    previousAutomaticPoint = null;
+    points.length = 0;
+  }
+
+  window.addEventListener("resize", resizeCanvases);
+
+  /*
+    Pause elapsed drawing time when the tab is hidden.
+    Returning to the page resumes the same continuous loop.
+  */
+
+  document.addEventListener("visibilitychange", function () {
+    lastFrameTime = null;
+  });
+
+  function animate(time) {
+    if (lastFrameTime === null) lastFrameTime = time;
+
+    var seconds = Math.min((time - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = time;
+
+    if (!document.hidden) {
+      advanceAutomaticPen(seconds);
+      drawCursorTrail(time);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  resizeCanvases();
+  requestAnimationFrame(animate);
+})();
+</script>
+
+</body>
+</html>
