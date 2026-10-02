@@ -1,903 +1,207 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>ㄷ</title>
-
-<meta name="description" content="">
-<meta name="author" content="">
-<meta property="og:type" content="website">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-body {
-  margin: 18px;
-  font: 13px/14.5px Arial, sans-serif;
-  color: dimgrey;
-  overflow: hidden;
-  text-rendering: geometricPrecision;
-}
-
-#automatic-ink,
-#ink-trail {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
-#automatic-ink { z-index: 99998; }
-#ink-trail { z-index: 99999; }
-
-.container {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: -1;
-  transform: none;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.container p {
-  position: absolute;
-  bottom: 6px;
-  left: 18px;
-  z-index: 10;
-}
-
-.container img {
-  position: relative;
-  z-index: 1;
-  max-height: 72vh;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-img {
-  cursor: pointer;
-  user-drag: none;
-  -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-drag: none;
-  -o-user-drag: none;
-}
-
-a {
-  color: black;
-  text-decoration: none;
-}
-
-a:hover { text-decoration: underline; }
-
-.horizon { max-width: 840px; }
-.squarish { max-width: 520px; }
-
-.flip-card {
-  width: 270px;
-  max-width: calc(100vw - 36px);
-  perspective: 1000px;
-  position: relative;
-  z-index: 77;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.flip-card-inner {
-  display: grid;
-  transition: transform 0.65s ease;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-}
-
-.flip-card.flipped .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front,
-.flip-card-back {
-  grid-area: 1 / 1;
-  width: 100%;
-  height: auto;
-  display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.flip-card-back { transform: rotateY(180deg); }
-
-#visible:hover { text-decoration: none; }
-
-@media screen and (max-width: 960px) {
-  .container p {
-    max-width: calc(100vw - 36px);
-    white-space: normal;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    max-height: 40vh;
-    overflow-y: auto;
-    bottom: 36px;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<canvas id="automatic-ink" aria-hidden="true"></canvas>
-<canvas id="ink-trail" aria-hidden="true"></canvas>
-
-<div
-  class="flip-card"
-  id="top-card"
-  role="button"
-  tabindex="0"
-  aria-label="Flip card"
-  aria-pressed="false"
->
-  <div class="flip-card-inner">
-    <img
-      class="flip-card-front"
-      src="https://upload.wikimedia.org/wikipedia/commons/0/03/%E3%84%B7_%28digeut%29_stroke_order.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
-      alt="Front of card"
-    >
-    <img
-      class="flip-card-back"
-      src="http://economybooks.info/daste/digeut.png"
-      alt="Back of card"
-    >
-  </div>
-</div>
-
-<br><br>
-
-<a href="mailto:z99zzd@proton.me" target="_blank">
-  <img
-    src="http://economybooks.info/daste/10.gif"
-    alt="Email"
-    style="max-width:70px;position:relative;z-index:77;"
-  >
-</a>
-
-<div class="container" onclick="plusSlides(1, 0)">
-  <div class="thing">
-    <img
-      class="horizon"
-      src="http://economybooks.info/daste/cover1.jpeg"
-      alt=""
-    >
-  </div>
-
-  <div class="thing">
-    <img
-      class="horizon"
-      src="http://economybooks.info/daste/poster1.jpeg"
-      alt=""
-    >
-  </div>
-
-  <div class="thing">
-    <img
-      class="horizon"
-      src="http://economybooks.info/daste/sticker1.png"
-      alt=""
-    >
-  </div>
-</div>
-
-<script>
-/* Slideshow */
-
-var slideId = ["thing"];
-var slideIndex = [0];
-
-document.addEventListener("DOMContentLoaded", function () {
-  var slides = document.getElementsByClassName(slideId[0]);
-
-  if (!slides.length) return;
-
-  slideIndex[0] = Math.floor(Math.random() * slides.length) + 1;
-  showSlides(slideIndex[0], 0);
-});
-
-function plusSlides(n, no) {
-  showSlides(slideIndex[no] += n, no);
-}
-
-function showSlides(n, no) {
-  var slides = document.getElementsByClassName(slideId[no]);
-
-  if (!slides.length) return;
-
-  if (n > slides.length) slideIndex[no] = 1;
-  if (n < 1) slideIndex[no] = slides.length;
-
-  for (var i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-
-  slides[slideIndex[no] - 1].style.display = "block";
-}
-
-/* Flipping card */
-
-var topCard = document.getElementById("top-card");
-
-function flipTopCard() {
-  topCard.classList.toggle("flipped");
-
-  topCard.setAttribute(
-    "aria-pressed",
-    topCard.classList.contains("flipped")
-  );
-}
-
-topCard.addEventListener("click", function (event) {
-  event.stopPropagation();
-  flipTopCard();
-});
-
-topCard.addEventListener("keydown", function (event) {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    flipTopCard();
-  }
-});
-
-/* Ballpoint drawing */
-
-(function () {
-  "use strict";
-
-  var cursorCanvas = document.getElementById("ink-trail");
-  var cursorContext = cursorCanvas.getContext("2d");
-
-  var autoCanvas = document.getElementById("automatic-ink");
-  var autoContext = autoCanvas.getContext("2d");
-
-  /*
-    AUTOMATIC PEN SETTINGS
-
-    Increase speedMultiplier for faster movement.
-    Width stays independent of speed.
-
-    Pauses and pen lifts are chosen at random intervals.
-  */
-
-  var speedMultiplier = 1;
-  var minimumSpeed = 1800;
-  var maximumSpeed = 6500;
-
-  var minimumWidth = 1.1;
-  var maximumWidth = 1.8;
-
-  var edgeMargin = 28;
-
-  var w = window.innerWidth;
-  var h = window.innerHeight;
-  var dpr = 1;
-
-  var trailLength = 7575;
-  var trailLifetime = 19000;
-  var cursorPoints = [];
-  var cursorDirty = false;
-
-  var position = null;
-  var heading = Math.random() * Math.PI * 2;
-  var direction = Math.random() < 0.5 ? -1 : 1;
-
-  var mode = "orbit";
-  var gesturesRemaining = 0;
-
-  var path = null;
-  var pathDistance = 0;
-  var pathIndex = 1;
-
-  var state = "draw";
-  var stateRemaining = 2;
-  var previousInkPoint = null;
-
-  var currentSpeed = 3400;
-  var targetSpeed = 3400;
-  var speedTimer = 0;
-  var speedResponse = 12;
-
-  var inkDistance = 0;
-  var lastFrameTime = null;
-
-  var phaseA = Math.random() * 100;
-  var phaseB = Math.random() * 100;
-
-  function random(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function distance(a, b) {
-    return Math.hypot(b.x - a.x, b.y - a.y);
-  }
-
-  function margin() {
-    return Math.min(edgeMargin, w * 0.12, h * 0.12);
-  }
-
-  function bounded(point) {
-    var m = margin() + 4;
-
-    return {
-      x: clamp(point.x, Math.min(m, w / 2), Math.max(w / 2, w - m)),
-      y: clamp(point.y, Math.min(m, h / 2), Math.max(h / 2, h - m))
-    };
-  }
-
-  function orbitPoint(angle, radius) {
-    var m = margin() + 6;
-
-    return bounded({
-      x: w / 2 + Math.cos(angle) * Math.max(1, w / 2 - m) * radius,
-      y: h / 2 + Math.sin(angle) * Math.max(1, h / 2 - m) * radius
-    });
-  }
-
-  function makeInkPoint(x, y, time, width, automatic) {
-    var jitter = automatic ? 0.4 : 0.8;
-
-    return {
-      x: x,
-      y: y,
-      time: time,
-      width: width,
-      offsetX: random(-jitter / 2, jitter / 2),
-      offsetY: random(-jitter / 2, jitter / 2),
-      dryness: Math.random(),
-      fleck: Math.random() > (automatic ? 0.94 : 0.82),
-      fleckX: random(-2, 2),
-      fleckY: random(-2, 2)
-    };
-  }
-
-  function drawSegment(context, a, b, fade) {
-    var dryness = b.dryness < 0.13 ? 0.22 : 1;
-
-    var ax = a.x + a.offsetX;
-    var ay = a.y + a.offsetY;
-    var bx = b.x + b.offsetX;
-    var by = b.y + b.offsetY;
-
-    var mx = (ax + bx) / 2 + (b.dryness - 0.5) * 0.8;
-    var my = (ay + by) / 2 + (0.5 - b.dryness) * 0.8;
-
-    context.lineCap = "round";
-    context.lineJoin = "round";
-
-    context.beginPath();
-    context.moveTo(ax, ay);
-    context.quadraticCurveTo(mx, my, bx, by);
-    context.lineWidth = b.width;
-    context.strokeStyle =
-      "rgba(54,49,192," + (0.40 * fade * dryness) + ")";
-    context.stroke();
-
-    context.beginPath();
-    context.moveTo(ax + 0.35, ay - 0.2);
-    context.quadraticCurveTo(
-      mx + 0.2, my - 0.25,
-      bx + 0.25, by - 0.15
-    );
-    context.lineWidth = Math.max(0.35, b.width * 0.38);
-    context.strokeStyle = "rgba(85,75,216," + (0.22 * fade) + ")";
-    context.stroke();
-
-    if (b.fleck) {
-      context.beginPath();
-      context.arc(
-        bx + b.fleckX,
-        by + b.fleckY,
-        0.3 + b.dryness * 0.45,
-        0,
-        Math.PI * 2
-      );
-      context.fillStyle = "rgba(54,49,192," + (0.22 * fade) + ")";
-      context.fill();
-    }
-  }
-
-  /* Cursor drawing: original fading behavior */
-
-  function trimCursorTrail() {
-    var total = 0;
-
-    for (var i = cursorPoints.length - 1; i > 0; i--) {
-      var newer = cursorPoints[i];
-      var older = cursorPoints[i - 1];
-      var length = distance(newer, older);
-
-      if (total + length > trailLength) {
-        var ratio = (trailLength - total) / length;
-
-        var cut = Object.assign({}, older, {
-          x: newer.x + (older.x - newer.x) * ratio,
-          y: newer.y + (older.y - newer.y) * ratio,
-          time: newer.time + (older.time - newer.time) * ratio,
-          width: newer.width + (older.width - newer.width) * ratio,
-          offsetX: 0,
-          offsetY: 0,
-          fleck: false
-        });
-
-        cursorPoints.splice(0, i, cut);
-        break;
-      }
-
-      total += length;
-    }
-  }
-
-  function addCursorPoint(x, y, time) {
-    var previous = cursorPoints[cursorPoints.length - 1];
-    var movement = previous ? distance(previous, {x:x, y:y}) : 0;
-
-    if (previous && movement < 1.2) return;
-
-    var speed = previous
-      ? movement / Math.max(1, time - previous.time)
-      : 0.2;
-
-    var width = Math.max(1.5, Math.min(3.2, 2.8 - speed * 1.1));
-
-    cursorPoints.push(makeInkPoint(x, y, time, width, false));
-    trimCursorTrail();
-    cursorDirty = true;
-  }
-
-  function drawCursor(time) {
-    if (!cursorPoints.length && !cursorDirty) return;
-
-    cursorContext.clearRect(0, 0, w, h);
-
-    while (
-      cursorPoints.length &&
-      time - cursorPoints[0].time > trailLifetime
-    ) {
-      cursorPoints.shift();
-    }
-
-    for (var i = 1; i < cursorPoints.length; i++) {
-      var fade = Math.max(
-        0,
-        1 - (time - cursorPoints[i].time) / trailLifetime
-      );
-
-      drawSegment(
-        cursorContext,
-        cursorPoints[i - 1],
-        cursorPoints[i],
-        fade
-      );
-    }
-
-    cursorDirty = cursorPoints.length > 0;
-  }
-
-  window.addEventListener("pointermove", function (event) {
-    if (event.pointerType === "touch") return;
-
-    var events = event.getCoalescedEvents
-      ? event.getCoalescedEvents()
-      : [];
-
-    if (!events.length) events = [event];
-
-    events.forEach(function (movement) {
-      addCursorPoint(
-        movement.clientX,
-        movement.clientY,
-        movement.timeStamp
-      );
-    });
-  }, {passive:true});
-
-  /*
-    Automatic movement uses changing curved gestures.
-
-    Each gesture is sampled by distance, so speed follows
-    the actual line rather than a fixed angular rotation.
-  */
-
-  function cubic(a, b, c, d, t) {
-    var u = 1 - t;
-
-    return {
-      x:
-        u*u*u*a.x +
-        3*u*u*t*b.x +
-        3*u*t*t*c.x +
-        t*t*t*d.x,
-
-      y:
-        u*u*u*a.y +
-        3*u*u*t*b.y +
-        3*u*t*t*c.y +
-        t*t*t*d.y
-    };
-  }
-
-  function createGesture() {
-    if (gesturesRemaining <= 0) {
-      mode = Math.random() < 0.60 ? "orbit" : "wander";
-
-      gesturesRemaining = mode === "orbit"
-        ? Math.floor(random(3, 11))
-        : Math.floor(random(1, 6));
-
-      if (Math.random() < 0.28) direction *= -1;
-    }
-
-    gesturesRemaining--;
-
-    var start = {x:position.x, y:position.y};
-    var target;
-    var arrivalHeading;
-
-    if (mode === "orbit") {
-      var a = Math.atan2(
-        (start.y - h / 2) / Math.max(1, h / 2),
-        (start.x - w / 2) / Math.max(1, w / 2)
-      );
-
-      a += direction * random(0.45, 1.65);
-
-      target = orbitPoint(a, random(0.40, 0.97));
-
-      arrivalHeading =
-        Math.atan2(
-          Math.cos(a) * h * direction,
-          -Math.sin(a) * w * direction
-        ) + random(-0.65, 0.65);
-    } else {
-      /* Free crossings, inward excursions and loose turns. */
-
-      target = bounded({
-        x: random(w * 0.08, w * 0.92),
-        y: random(h * 0.08, h * 0.92)
-      });
-
-      arrivalHeading = Math.random() * Math.PI * 2;
-    }
-
-    var length = Math.max(20, distance(start, target));
-    var handleA = length * random(0.22, 0.75);
-    var handleB = length * random(0.22, 0.85);
-
-    /*
-      Matching the departure direction to the previous
-      gesture makes consecutive strokes flow together.
-    */
-
-    var controlA = bounded({
-      x: start.x + Math.cos(heading) * handleA,
-      y: start.y + Math.sin(heading) * handleA
-    });
-
-    var controlB = bounded({
-      x: target.x - Math.cos(arrivalHeading) * handleB,
-      y: target.y - Math.sin(arrivalHeading) * handleB
-    });
-
-    var actualArrival = Math.atan2(
-      target.y - controlB.y,
-      target.x - controlB.x
-    );
-
-    /*
-      All control points are inside the safe area.
-      The entire Bézier curve therefore stays inside it.
-    */
-
-    var estimatedLength =
-      distance(start, controlA) +
-      distance(controlA, controlB) +
-      distance(controlB, target);
-
-    var samples = Math.max(
-      80,
-      Math.min(700, Math.ceil(estimatedLength / 3))
-    );
-
-    var table = [{x:start.x, y:start.y, distance:0}];
-    var total = 0;
-    var previous = start;
-
-    for (var i = 1; i <= samples; i++) {
-      var point = cubic(
-        start,
-        controlA,
-        controlB,
-        target,
-        i / samples
-      );
-
-      total += distance(previous, point);
-
-      table.push({
-        x: point.x,
-        y: point.y,
-        distance: total
-      });
-
-      previous = point;
-    }
-
-    path = {
-      table: table,
-      length: total,
-      arrivalHeading: actualArrival
-    };
-
-    pathDistance = 0;
-    pathIndex = 1;
-  }
-
-  function pointOnPath(travel) {
-    var table = path.table;
-
-    while (
-      pathIndex < table.length - 1 &&
-      table[pathIndex].distance < travel
-    ) {
-      pathIndex++;
-    }
-
-    var a = table[pathIndex - 1];
-    var b = table[pathIndex];
-
-    var ratio = clamp(
-      (travel - a.distance) /
-      Math.max(0.000001, b.distance - a.distance),
-      0,
-      1
-    );
-
-    return {
-      x: a.x + (b.x - a.x) * ratio,
-      y: a.y + (b.y - a.y) * ratio
-    };
-  }
-
-  function leaveInk(point) {
-    /*
-      Subtle nib wobble is measured along the drawing,
-      so stopping never changes the line or adds ink.
-    */
-
-    var x = point.x +
-      Math.sin(inkDistance * 0.073 + phaseA) * 0.45;
-
-    var y = point.y +
-      Math.sin(inkDistance * 0.091 + phaseB) * 0.45;
-
-    var pressure =
-      0.5 +
-      0.32 * Math.sin(inkDistance * 0.009 + phaseA) +
-      0.18 * Math.sin(inkDistance * 0.027 + phaseB);
-
-    var width =
-      minimumWidth +
-      (maximumWidth - minimumWidth) * pressure;
-
-    var next = makeInkPoint(x, y, 0, width, true);
-
-    if (previousInkPoint) {
-      if (distance(previousInkPoint, next) < 1.4) return;
-
-      drawSegment(autoContext, previousInkPoint, next, 1);
-    }
-
-    previousInkPoint = next;
-  }
-
-  function movePen(amount, drawing) {
-    var remaining = amount;
-
-    while (remaining > 0.00001) {
-      if (!path) createGesture();
-
-      var available = path.length - pathDistance;
-
-      if (available < 0.00001) {
-        heading = path.arrivalHeading;
-        path = null;
-        continue;
-      }
-
-      var step = Math.min(2, remaining, available);
-
-      pathDistance += step;
-      remaining -= step;
-      inkDistance += step;
-
-      position = pointOnPath(pathDistance);
-
-      if (drawing) leaveInk(position);
-
-      if (pathDistance >= path.length - 0.00001) {
-        heading = path.arrivalHeading;
-        path = null;
-      }
-    }
-  }
-
-  /*
-    draw: moving with ink
-    pause: fully stationary, no new ink
-    lift: moving without ink
-  */
-
-function changeState() {
-  if (state === "draw") {
-var state = "pause";
-var stateRemaining = random(10, 30);
-    previousInkPoint = null;
-  } else if (state === "pause") {
-    // Brief invisible movement before drawing somewhere else.
-    state = "lift";
-    stateRemaining = random(0.10, 0.55);
-
-    path = null;
-    mode = Math.random() < 0.5 ? "wander" : "orbit";
-    gesturesRemaining = Math.floor(random(1, 5));
-    heading = Math.random() * Math.PI * 2;
-  } else {
-    state = "draw";
-    stateRemaining = random(0.2, 1.2);
-    previousInkPoint = null;
-    leaveInk(position);
-  }
-}
-
-  function updateSpeed(seconds) {
-    speedTimer -= seconds;
-
-    if (speedTimer <= 0) {
-      var choice = Math.random();
-
-      if (choice < 0.30) {
-        targetSpeed = random(4800, maximumSpeed);
-      } else if (choice < 0.55) {
-        targetSpeed = random(minimumSpeed, 2800);
-      } else {
-        targetSpeed = random(2800, 4800);
-      }
-
-      speedTimer = random(0.09, 0.65);
-      speedResponse = random(8, 26);
-    }
-
-    currentSpeed +=
-      (targetSpeed - currentSpeed) *
-      (1 - Math.exp(-speedResponse * seconds));
-
-    currentSpeed = clamp(
-      currentSpeed,
-      minimumSpeed,
-      maximumSpeed
-    );
-  }
-
-  function updateAutomatic(seconds) {
-    var remaining = seconds;
-
-    while (remaining > 0.000001) {
-      if (stateRemaining <= 0.000001) {
-        changeState();
-      }
-
-      var step = Math.min(
-        remaining,
-        stateRemaining,
-        1 / 120
-      );
-
-      if (state !== "pause") {
-        updateSpeed(step);
-
-        movePen(
-          currentSpeed * speedMultiplier * step,
-          state === "draw"
-        );
-      }
-
-      stateRemaining -= step;
-      remaining -= step;
-    }
-  }
-
-  /* Preserve permanent ink across window resizing. */
-
-  function resizeCanvases() {
-    var saved = document.createElement("canvas");
-
-    saved.width = autoCanvas.width;
-    saved.height = autoCanvas.height;
-    saved.getContext("2d").drawImage(autoCanvas, 0, 0);
-
-    var oldW = w;
-    var oldH = h;
-
-    w = window.innerWidth;
-    h = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    [cursorCanvas, autoCanvas].forEach(function (canvas) {
-      canvas.width = Math.max(1, Math.round(w * dpr));
-      canvas.height = Math.max(1, Math.round(h * dpr));
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
-
-      canvas.getContext("2d").setTransform(
-        dpr, 0, 0, dpr, 0, 0
-      );
-    });
-
-    if (saved.width && saved.height) {
-      autoContext.drawImage(
-        saved,
-        0, 0, saved.width, saved.height,
-        0, 0, w, h
-      );
-    }
-
-    position = position
-      ? bounded({
-          x: position.x * w / Math.max(1, oldW),
-          y: position.y * h / Math.max(1, oldH)
-        })
-      : orbitPoint(Math.random() * Math.PI * 2, 0.8);
-
-    path = null;
-    previousInkPoint = null;
-
-    cursorPoints.length = 0;
-    cursorDirty = false;
-  }
-
-  window.addEventListener("resize", resizeCanvases);
-
-  document.addEventListener("visibilitychange", function () {
-    lastFrameTime = null;
-  });
-
-  function animate(time) {
-    if (lastFrameTime === null) lastFrameTime = time;
-
-    var seconds = Math.min(
-      (time - lastFrameTime) / 1000,
-      0.05
-    );
-
-    lastFrameTime = time;
-
-    if (!document.hidden) {
-      updateAutomatic(seconds);
-      drawCursor(time);
-    }
-
-    requestAnimationFrame(animate);
-  }
-
-  resizeCanvases();
-  requestAnimationFrame(animate);
-})();
-</script>
-
-</body>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script
+      src="https://code.jquery.com/jquery-2.2.4.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+      crossorigin="anonymous"></script>
+      <script type="text/javascript" src="docs/script.js"></script>
+    <meta charset="utf-8">
+    <title>D</title>
+
+  </head>
+  <body>
+    <header>
+        <a href="info.html">Seokyung Kim </a> 
+
+      </header>
+      <div class="reload">
+
+      </div>
+  <main>
+  <div class="work-index">
+
+    <div class="work-item">
+      <a href="projects/Calico publication/calico publication.html"  target="_self"><img alt="" src="projects/Calico publication/thumb.png"></a>
+      <span class="mobile-caption"><p><em>Calico</em>, publication for Eun Choi's exhibition Calico, 2025</p></span>
+    </div>
+   
+
+      <div class="work-item">
+      <a href="projects/onjium_book/onjium_book.html"  target="_self"><img alt="" src="projects/onjium_book/thumb.png"></a>
+      <span class="mobile-caption"><p><em>Story of Onjium in Richelieu</em>, publication, 2024</p></span>
+    </div>
+    
+    <div class="work-item">
+      <a href="projects/onjium_card/onjium_card.html"  target="_self"><img alt="" src="projects/onjium_card/thumb2.png"></a>
+      <span class="mobile-caption"><p><em>Onjium in Richelieu</em>, invitation card, 2024</p></span>
+    </div>
+    
+    <div class="work-item">
+      <a href="projects/beaver/beaver.html"  target="_self"><img alt="" src="projects/beaver/thumb.png"></a>
+      <span class="mobile-caption"><p><em>To the Beaver's House, Donghwan Kam Solo Exhibition</em>, poster design, 2024</p></span>
+    </div>
+
+    
+<div class="work-item">
+      <a href="projects/calico/calico.html"  target="_self"><img alt="" src="projects/calico/thumb.jpg"></a>
+      <span class="mobile-caption"><p><em>Calico, Eun Choi Solo Exhibition</em>, poster/leaflet design, 2024</p></span>
+    </div>
+<!-- 
+    <div class="work-item">
+      <a href="#"  target="_self"><img alt="" src="projects/kwang/03.jpg"></a>
+      <span class="mobile-caption"><p><em>Kwang, theatre play by Shin Jin Ho</em>, poster design, 2024</p></span>
+    </div>
+ -->
+
+
+      <div class="work-item">
+        <a href="projects/newmoonsong poster/newmoonsong.html"  target="_self"><img alt="" src="projects/newmoonsong poster/01.jpg"></a>
+        <span class="mobile-caption"><p><em>New Moon Song - Qihang Li</em>, poster design, B09K, Changsha, 2024</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/newmoonsong book/newmoonsong_book.html" data-title="<p><em>Qihang Li - New Moon Song booklet</em>  2024</p>" alt="New Moon Song published by B09K, 2024" target="_self"><img alt="" src="projects/newmoonsong book/03.png"></a>
+        <span class="mobile-caption"><p><em>New Moon Song - Qihang Li</em>, booklet design, B09K, Changsha, 2024</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/dh_matchbox/dh_matchbox.html" data-title="<p><em>Dolphin Hotel</em>, matchbox, 2024</p>" alt="Dolphin Hotel, matchbox, 2024" target="_self"><img alt="" src="projects/dh_matchbox/01.png"></a>
+        <span class="mobile-caption"><p><em>Dolphin Hotel</em>, matchbox, 2024</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/dh_CD_obi/dh_CD.html" data-title="<p><em>Dolphin Hotel</em>, CD, 2024 (i.c.w. Qihang Li)</p>" alt="Dolphin Hotel, CD, 2024 (i.c.w. Qihang Li)" target="_self"><img alt="" src="projects/dh_CD_obi/thumb.png"></a>
+        <span class="mobile-caption"><p><em>Dolphin Hotel</em>, CD, 2024 (i.c.w. Qihang Li)</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/good time/good_time.html" data-title="<p><em>Good Time</em> <strong>, catalogue for a photograph auction, Werkplaats Typografie, Arnhem NL</strong>, 2023</p>" alt="Good Time, catalogue for a photograph auction, Werkplaats Typografie, Arnhem NL, 2023" target="_self"><img alt="" src="projects/good time/thumb.png"></a>
+        <span class="mobile-caption"><p><em>Good Time</em>, catalogue for photography auction, Werkplaats Typografie, Arnhem NL, 2023</p></span>
+      </div>
+
+
+
+      <div class="work-item">
+        <a href="projects/cookorhoop/cookorhoop.html" data-title="<p><em>Cook or Hoop</em>, recipe book design for Culinary Boost, 2023</p>" alt="Cook or Hoop, recipe book design for Culinary Boost, 2023" target="_self"><img alt="" src="projects/cookorhoop/01.png"></a>
+        <span class="mobile-caption"><p><em>Cook or Hoop</em>, publication design for Culinary Boost, 2023</p></span>
+      </div>
+
+
+
+      <div class="work-item">
+        <a href="projects/namesofwater_vinyl/namesofwater_vinyl.html" data-title="<p><em>Names of Water</em>, 10inch vinyl design for Donghwan Kam, 2023</p>" alt="Names of Water, 10inch vinyl design for Donghwan Kam, 2023" target="_self"><img alt="" src="projects/namesofwater_vinyl/03.png"></a>
+        <span class="mobile-caption"><p><em>Names of Water</em>, 10" vinyl design for Donghwan Kam, 2023</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/namesofwater_poster/namesofwater_poster.html" data-title="<p><em>Names of Water</em>, poster design for Donghwan Kam, 2023</p>" alt="Names of Water, poster design for Donghwan Kam, 2023" target="_self"><img alt="" src="projects/namesofwater_poster/01.png"></a>
+        <span class="mobile-caption">  <p><em>Names of Water</em>, poster design for Donghwan Kam, 2022</p></span>
+      </div>
+
+
+
+
+
+
+
+
+      <div class="work-item">
+        <a href="projects/ninabell_exhb/ninabell_exhb.html" data-title="<p><em>Story Cards for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2023</p>" alt="Story Cards for Nina bell F. House Museum, Casco Art Institute: Working for the Commons, 2023" target="_self"><img alt="" src="projects/ninabell_exhb/folder-thumb.png"></a>
+        <span class="mobile-caption"><p><em>Story Cards for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2023</p></span>
+      </div>
+
+
+      <div class="work-item">
+        <a href="projects/ninabell_exhb/ninabell_instruct.html" data-title="<p><em>Instruction Card for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2023</p>" alt="Instruction Card for Nina bell F. House Museum, Casco Art Institute: Working for the Commons, 2023" target="_self"><img alt="" src="projects/ninabell_exhb/instruct-thumb.png"></a>
+        <span class="mobile-caption"><p><em>Instruction Card for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2023</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/ninabell/ninabell.html" data-title="<p><em>Sticker Leaflet for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2022</p>" alt="Sticker Leaflet for Nina bell F. House Museum, Casco Art Institute: Working for the Commons, 2022" target="_self"><img alt="" src="projects/ninabell/04.png"></a>
+        <span class="mobile-caption"><p><em>Sticker Leaflet for Nina bell F. House Museum,</em> Casco Art Institute: Working for the Commons, 2022</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/kanitha tith/kanitha_tith.html" data-title="<p><em>someone is moving, publication design for Kanitha Tith,</em> 2023</p>" alt="someone is moving, publication design for Kanitha Tith, 2023>" target="_self"><img alt="" src="projects/kanitha tith/01.png"></a>
+        <span class="mobile-caption"><p><em>someone is moving</em>, publication design for Kanitha Tith, 2023</p></span>
+      </div>
+
+
+      <div class="work-item">
+        <a href="projects/kentia_palm/kentia_palm.html" data-title="<p><em>Kentia Palm, Form design for Donghwan Kam,</em> 2022</p>" alt="Kentia Palm, Form design for Donghwan Kam, 2022" target="_self"><img alt="" src="projects/kentia_palm/01.png"></a>
+        <span class="mobile-caption"><p><em>Kentia Palm, Form design for Donghwan Kam,</em> 2022</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/kiosk/kiosk.html" data-title="<p><em>Kiosk Hanuri</em>, annual report, Werkplaats Typografie, 2022</p>" alt="Kiosk Hanuri, annual report, Werkplaats Typografie, 2022" target="_self"><img alt="" src="projects/kiosk/01.png"></a>
+        <span class="mobile-caption"><p><em>Kiosk Hanuri</em>, annual report, Werkplaats Typografie, 2022</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/100films100posters/roomsharing.html" data-title="<p><em>Room Sharing</em>, 100films100posters, JIFF, 2022</p>" alt="Room Sharing, 100films100posters, JIFF, 2022" target="_self"><img alt="" src="projects/100films100posters/02.jpg"></a>
+        <span class="mobile-caption"><p><em>Room Sharing</em>, 100films100posters, JIFF, 2022</p></span>
+      </div>
+
+
+
+      <div class="work-item">
+        <a href="projects/100films100posters/hersocialistsmile.html" data-title="<p><em>Her Socialist Smile</em>, 100films100posters, JIFF, 2021</p>" alt="Her Socialist Smile, 100films100posters, JIFF, 2021" target="_self"><img alt="" src="projects/100films100posters/01.jpeg"></a>
+        <span class="mobile-caption"><p><em>Her Socialist Smile</em>, 100films100posters, JIFF, 2021</p></span>
+      </div>
+
+
+      <div class="work-item">
+        <a href="projects/eachdifferent/eachdifferent.html" data-title="<p><em>Seoro Dareun(Each different)</em>, karaoke video for Donghwan Kam, 2021</p>" alt="Seoro Dareun(Each different), karaoke video for Donghwan Kam, 2021" target="_self"><img alt="" src="projects/eachdifferent/thumb.png"></a>
+        <span class="mobile-caption"><p><em>Seoro Dareun(Each different)</em>, karaoke video for Donghwan Kam, 2021</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/Tao/tao.html" data-title="<p><em>Process of Translation</em>, poster design, 2021</p>" alt="" ><img alt="" src="projects/Tao/01.png"></a>
+        <span class="mobile-caption"><p><em>Process of Translation</em>, poster design, 2021</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/ysl/ysl.html" data-title="<p><em>YSL</em>, publication design for Ian Page, 2021</p>" alt="YSL, publication design for Ian Page, 2021" ><img alt="" src="projects/ysl/01.png"></a>
+        <span class="mobile-caption"><p><em>YSL</em>, publication design for Ian Page, 2021</p></span>
+      </div>
+
+      <div class="work-item">
+        <a href="projects/thisflower/thisflower.html" data-title="<p><em>This Flower does not Like Korean Novels</em>, publication design, 2020</p>" alt="This Flower does not Like Korean Novels, publication design, 2020" target="_self"><img alt="" src="projects/thisflower/02.png"></a>
+        <span class="mobile-caption"><p><em>This Flower does not Like Korean Novels</em>, publication design, 2020</p></span>
+      </div>
+
+    
+      <div class="work-item">
+        <a href="projects/hero_stratos/hero_stratos.html" data-title="<p><em>Hero Stratos, postcard design,</em> 2020</p>" alt="Hero Stratos, postcard design, 2020" target="_self"><img alt="" src="projects/hero_stratos/01.png"></a>
+        <span class="mobile-caption"><p><em>Hero Stratos, postcard design,</em> 2020</p></span>
+      </div>
+
+
+
+      <div class="work-item">
+        <a href="projects/bj/bj.html" data-title="<p><em>(DON'T) LOOK AT IT</em>, menu catalogue for Bangjoo Kim, 2020</p>" alt="(DON'T) LOOK AT IT, menu catalogue for Bangjoo Kim, 2020" target="_self"><img alt="" src="projects/bj/01.png"></a>
+        <span class="mobile-caption">  <p><em>(DON'T) LOOK AT IT</em>, menu catalogue for Bangjoo Kim, 2020</p></span>
+      </div>
+
+  <div class="work-item">
+        <a href="projects/onjium/onjium.html" data-title="  <p><em>Onjium in Richelieu</em>, poster, 2019</p>" alt="" target="_self"><img alt="" src="projects/onjium/2.png"></a>
+        <span class="mobile-caption">   <p><em>Onjium in Richelieu</em>, poster design, 2019</p></span>
+      </div>
+    
+      <div class="work-item">
+        <a href="projects/bell/bell.html" data-title="  <p><em>Bell</em>, typeface, 2019</p>" alt="Bell, typeface, 2019" target="_self"><img alt="" src="projects/bell/01.png"></a>
+        <span class="mobile-caption">   <p><em>Bell</em>, typeface, 2019</p></span>
+      </div>
+
+
+
+
+
+
+  </main>
+  </body>
 </html>
